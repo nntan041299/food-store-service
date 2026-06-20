@@ -1,6 +1,6 @@
-package com.twochickendevs.foodstoreservice.user.repository;
+package com.twochickendevs.foodstoreservice.auth.repository;
 
-import com.twochickendevs.foodstoreservice.user.entity.User;
+import com.twochickendevs.foodstoreservice.auth.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

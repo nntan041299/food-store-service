@@ -1,4 +1,4 @@
-package com.twochickendevs.foodstoreservice.user.entity;
+package com.twochickendevs.foodstoreservice.auth.entity;
 
 import com.twochickendevs.foodstoreservice.common.entity.BaseEntity;
 import jakarta.persistence.*;

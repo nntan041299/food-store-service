@@ -1,6 +1,6 @@
 package com.twochickendevs.foodstoreservice.security;
 
-import com.twochickendevs.foodstoreservice.user.repository.UserRepository;
+import com.twochickendevs.foodstoreservice.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

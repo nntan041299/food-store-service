@@ -8,7 +8,9 @@ CREATE TABLE users
     role       VARCHAR(20)  NOT NULL DEFAULT 'USER',
     is_active  BOOLEAN      NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP    NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP    NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMP    NOT NULL DEFAULT NOW(),
+    created_by VARCHAR(100),
+    updated_by VARCHAR(100)
 );
 
 CREATE INDEX idx_users_username ON users (username);
