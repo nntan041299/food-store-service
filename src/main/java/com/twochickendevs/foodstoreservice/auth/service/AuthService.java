@@ -9,6 +9,7 @@ import com.twochickendevs.foodstoreservice.auth.dto.UserResponse;
 import com.twochickendevs.foodstoreservice.auth.entity.Role;
 import com.twochickendevs.foodstoreservice.auth.mapper.UserMapper;
 import com.twochickendevs.foodstoreservice.security.JwtUtil;
+import com.twochickendevs.foodstoreservice.security.TokenBlacklistService;
 import com.twochickendevs.foodstoreservice.auth.entity.User;
 import com.twochickendevs.foodstoreservice.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -30,6 +33,7 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final TokenBlacklistService tokenBlacklistService;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
@@ -91,6 +95,18 @@ public class AuthService {
         }
 
         return userMapper.toResponse(userRepository.save(user));
+    }
+
+    public void logout(String bearerToken) {
+        if (!StringUtils.hasText(bearerToken) || !bearerToken.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Missing or invalid Authorization header");
+        }
+        String token = bearerToken.substring(7);
+        if (!jwtUtil.isAccessToken(token)) {
+            throw new IllegalArgumentException("Only access tokens can be used to logout");
+        }
+        Instant expiresAt = jwtUtil.extractExpiration(token).toInstant();
+        tokenBlacklistService.revoke(token, expiresAt);
     }
 
     public TokenResponse login(LoginRequest request) {
