@@ -12,8 +12,10 @@ import com.twochickendevs.foodstoreservice.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +46,13 @@ public class AuthService {
                 .build();
 
         return UserResponse.from(userRepository.save(user));
+    }
+
+    public UserResponse getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .map(UserResponse::from)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 
     public TokenResponse login(LoginRequest request) {
