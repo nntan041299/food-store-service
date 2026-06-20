@@ -6,6 +6,7 @@ import com.twochickendevs.foodstoreservice.auth.dto.RefreshTokenRequest;
 import com.twochickendevs.foodstoreservice.auth.dto.TokenResponse;
 import com.twochickendevs.foodstoreservice.auth.dto.UserResponse;
 import com.twochickendevs.foodstoreservice.auth.entity.Role;
+import com.twochickendevs.foodstoreservice.auth.mapper.UserMapper;
 import com.twochickendevs.foodstoreservice.security.JwtUtil;
 import com.twochickendevs.foodstoreservice.auth.entity.User;
 import com.twochickendevs.foodstoreservice.auth.repository.UserRepository;
@@ -27,6 +28,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     public UserResponse register(CreateUserRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -45,13 +47,13 @@ public class AuthService {
                 .isActive(true)
                 .build();
 
-        return UserResponse.from(userRepository.save(user));
+        return userMapper.toResponse(userRepository.save(user));
     }
 
     public UserResponse getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
-                .map(UserResponse::from)
+                .map(userMapper::toResponse)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 
