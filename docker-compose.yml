@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  food-store-db:
+    image: postgres:16.11-alpine
+    container_name: food-store-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: food-store-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - food-store-db:/var/lib/postgresql/data
+
+volumes:
+  food-store-db:
