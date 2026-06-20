@@ -37,13 +37,16 @@ public class AuthService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already exists: " + request.getEmail());
         }
+        if (request.getRole() != Role.CUSTOMER && request.getRole() != Role.SHOP_OWNER) {
+            throw new IllegalArgumentException("Invalid role: " + request.getRole());
+        }
 
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .fullName(request.getFullName())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
+                .role(request.getRole())
                 .isActive(true)
                 .build();
 

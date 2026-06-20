@@ -3,6 +3,7 @@ package com.twochickendevs.foodstoreservice.common.exception;
 import com.twochickendevs.foodstoreservice.common.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -21,6 +22,11 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .orElse("Invalid request");
         return build(HttpStatus.BAD_REQUEST, message);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException ex) {
+        return build(HttpStatus.BAD_REQUEST, "Invalid request format");
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
