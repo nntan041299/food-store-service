@@ -23,6 +23,10 @@ public class ShopService {
 
     @Transactional
     public ShopResponse createShop(CreateShopRequest request) {
+        if (shopRepository.existsByName(request.getName())) {
+            throw new IllegalArgumentException("Shop name already exists: " + request.getName());
+        }
+
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User owner = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
