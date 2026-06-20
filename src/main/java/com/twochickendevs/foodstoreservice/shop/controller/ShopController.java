@@ -2,13 +2,16 @@ package com.twochickendevs.foodstoreservice.shop.controller;
 
 import com.twochickendevs.foodstoreservice.shop.dto.CreateShopRequest;
 import com.twochickendevs.foodstoreservice.shop.dto.ShopResponse;
+import com.twochickendevs.foodstoreservice.shop.dto.UpdateShopRequest;
 import com.twochickendevs.foodstoreservice.shop.service.ShopService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,5 +27,12 @@ public class ShopController {
     @PreAuthorize("hasRole('SHOP_OWNER')")
     public ResponseEntity<ShopResponse> createShop(@Valid @RequestBody CreateShopRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(shopService.createShop(request));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('SHOP_OWNER')")
+    public ResponseEntity<ShopResponse> updateShop(@PathVariable Long id,
+                                                   @Valid @RequestBody UpdateShopRequest request) {
+        return ResponseEntity.ok(shopService.updateShop(id, request));
     }
 }
