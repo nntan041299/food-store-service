@@ -4,7 +4,6 @@ CREATE TABLE inventory_items
     shop_id             BIGINT         NOT NULL REFERENCES shops (id),
     name                VARCHAR(150)   NOT NULL,
     description         TEXT,
-    category            VARCHAR(100),
     price               NUMERIC(10, 2) NOT NULL,
     unit                VARCHAR(20)    NOT NULL DEFAULT 'pcs',
     quantity            INTEGER        NOT NULL DEFAULT 0,
