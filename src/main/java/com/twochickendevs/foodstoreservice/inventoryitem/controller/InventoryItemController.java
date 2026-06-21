@@ -29,6 +29,7 @@ public class InventoryItemController {
     private final InventoryItemService inventoryItemService;
 
     @GetMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<InventoryItemResponse>> searchInventoryItems(
             @PathVariable Long shopId,
             @RequestParam(required = false) String name,
