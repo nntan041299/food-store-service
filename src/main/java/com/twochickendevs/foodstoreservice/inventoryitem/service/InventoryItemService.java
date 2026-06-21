@@ -4,8 +4,10 @@ import com.twochickendevs.foodstoreservice.auth.entity.User;
 import com.twochickendevs.foodstoreservice.auth.repository.UserRepository;
 import com.twochickendevs.foodstoreservice.category.entity.Category;
 import com.twochickendevs.foodstoreservice.category.repository.CategoryRepository;
+import com.twochickendevs.foodstoreservice.common.exception.ResourceNotFoundException;
 import com.twochickendevs.foodstoreservice.inventoryitem.dto.CreateInventoryItemRequest;
 import com.twochickendevs.foodstoreservice.inventoryitem.dto.InventoryItemResponse;
+import com.twochickendevs.foodstoreservice.inventoryitem.dto.UpdateInventoryItemRequest;
 import com.twochickendevs.foodstoreservice.inventoryitem.entity.InventoryItem;
 import com.twochickendevs.foodstoreservice.inventoryitem.mapper.InventoryItemMapper;
 import com.twochickendevs.foodstoreservice.inventoryitem.repository.InventoryItemRepository;
@@ -17,6 +19,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,12 +37,10 @@ public class InventoryItemService {
 
     @Transactional
     public InventoryItemResponse createInventoryItem(Long shopId, CreateInventoryItemRequest request) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        User owner = getAuthenticatedUser();
 
         Shop shop = shopRepository.findByIdAndOwnerId(shopId, owner.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Shop not found: " + shopId));
+                .orElseThrow(() -> new ResourceNotFoundException("Shop not found: " + shopId));
 
         if (inventoryItemRepository.existsByShopIdAndName(shopId, request.getName())) {
             throw new IllegalArgumentException("Item name already exists in this shop: " + request.getName());
@@ -60,6 +62,57 @@ public class InventoryItemService {
                 .build();
 
         return inventoryItemMapper.toResponse(inventoryItemRepository.save(inventoryItem));
+    }
+
+    @Transactional
+    public InventoryItemResponse updateInventoryItem(Long shopId, Long itemId, UpdateInventoryItemRequest request) {
+        User owner = getAuthenticatedUser();
+
+        shopRepository.findByIdAndOwnerId(shopId, owner.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Shop not found: " + shopId));
+
+        InventoryItem item = inventoryItemRepository.findByIdAndShopId(itemId, shopId)
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory item not found: " + itemId));
+
+        if (StringUtils.hasText(request.getName()) && !request.getName().equals(item.getName())) {
+            if (inventoryItemRepository.existsByShopIdAndName(shopId, request.getName())) {
+                throw new IllegalArgumentException("Item name already exists in this shop: " + request.getName());
+            }
+            item.setName(request.getName());
+        }
+
+        if (request.getDescription() != null) {
+            item.setDescription(request.getDescription());
+        }
+        if (request.getCategoryIds() != null) {
+            item.setCategories(resolveCategories(shopId, request.getCategoryIds()));
+        }
+        if (request.getPrice() != null) {
+            item.setPrice(request.getPrice());
+        }
+        if (request.getUnit() != null) {
+            item.setUnit(request.getUnit());
+        }
+        if (request.getQuantity() != null) {
+            item.setQuantity(request.getQuantity());
+        }
+        if (request.getLowStockThreshold() != null) {
+            item.setLowStockThreshold(request.getLowStockThreshold());
+        }
+        if (request.getImageUrl() != null) {
+            item.setImageUrl(request.getImageUrl());
+        }
+        if (request.getIsAvailable() != null) {
+            item.setAvailable(request.getIsAvailable());
+        }
+
+        return inventoryItemMapper.toResponse(item);
+    }
+
+    private User getAuthenticatedUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 
     private Set<Category> resolveCategories(Long shopId, Set<Long> categoryIds) {
