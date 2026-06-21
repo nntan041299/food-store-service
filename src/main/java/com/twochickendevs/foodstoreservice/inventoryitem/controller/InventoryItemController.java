@@ -3,18 +3,23 @@ package com.twochickendevs.foodstoreservice.inventoryitem.controller;
 import com.twochickendevs.foodstoreservice.inventoryitem.dto.CreateInventoryItemRequest;
 import com.twochickendevs.foodstoreservice.inventoryitem.dto.InventoryItemResponse;
 import com.twochickendevs.foodstoreservice.inventoryitem.dto.UpdateInventoryItemRequest;
+import com.twochickendevs.foodstoreservice.inventoryitem.entity.InventoryUnit;
 import com.twochickendevs.foodstoreservice.inventoryitem.service.InventoryItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/shops/{shopId}/inventory-items")
@@ -22,6 +27,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class InventoryItemController {
 
     private final InventoryItemService inventoryItemService;
+
+    @GetMapping
+    public ResponseEntity<List<InventoryItemResponse>> searchInventoryItems(
+            @PathVariable Long shopId,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) InventoryUnit unit,
+            @RequestParam(required = false) List<Long> categoryIds) {
+        return ResponseEntity.ok(inventoryItemService.searchInventoryItems(shopId, name, unit, categoryIds));
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('SHOP_OWNER')")

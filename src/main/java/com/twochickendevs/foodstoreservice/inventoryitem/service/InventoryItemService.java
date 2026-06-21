@@ -9,11 +9,15 @@ import com.twochickendevs.foodstoreservice.inventoryitem.dto.CreateInventoryItem
 import com.twochickendevs.foodstoreservice.inventoryitem.dto.InventoryItemResponse;
 import com.twochickendevs.foodstoreservice.inventoryitem.dto.UpdateInventoryItemRequest;
 import com.twochickendevs.foodstoreservice.inventoryitem.entity.InventoryItem;
+import com.twochickendevs.foodstoreservice.inventoryitem.entity.InventoryUnit;
 import com.twochickendevs.foodstoreservice.inventoryitem.mapper.InventoryItemMapper;
 import com.twochickendevs.foodstoreservice.inventoryitem.repository.InventoryItemRepository;
 import com.twochickendevs.foodstoreservice.shop.entity.Shop;
 import com.twochickendevs.foodstoreservice.shop.repository.ShopRepository;
+import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -107,6 +111,37 @@ public class InventoryItemService {
         }
 
         return inventoryItemMapper.toResponse(item);
+    }
+
+    @Transactional(readOnly = true)
+    public List<InventoryItemResponse> searchInventoryItems(Long shopId, String name, InventoryUnit unit,
+                                                            List<Long> categoryIds) {
+        if (!shopRepository.existsById(shopId)) {
+            throw new ResourceNotFoundException("Shop not found: " + shopId);
+        }
+
+        Specification<InventoryItem> spec = Specification
+                .<InventoryItem>where((root, query, cb) -> cb.equal(root.get("shop").get("id"), shopId))
+                .and((root, query, cb) -> cb.isTrue(root.get("isAvailable")));
+
+        if (StringUtils.hasText(name)) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+        }
+        if (unit != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("unit"), unit));
+        }
+        if (!CollectionUtils.isEmpty(categoryIds)) {
+            spec = spec.and((root, query, cb) -> {
+                query.distinct(true);
+                return root.join("categories", JoinType.INNER).get("id").in(categoryIds);
+            });
+        }
+
+        return inventoryItemRepository.findAll(spec, Sort.by("name"))
+                .stream()
+                .map(inventoryItemMapper::toResponse)
+                .toList();
     }
 
     private User getAuthenticatedUser() {
