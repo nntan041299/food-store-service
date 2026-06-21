@@ -61,7 +61,9 @@ public class OrderService {
                 ));
 
         Set<Long> itemIds = quantityByItemId.keySet();
-        List<InventoryItem> inventoryItems = inventoryItemRepository.findAllById(itemIds);
+        // Use a locking query (SELECT ... FOR UPDATE, ordered by id) to prevent
+        // concurrent orders from creating a race condition on shared inventory quantities.
+        List<InventoryItem> inventoryItems = inventoryItemRepository.findAllByIdForUpdate(itemIds);
 
         // Validate all requested items exist and belong to this shop
         if (inventoryItems.size() != itemIds.size()) {
