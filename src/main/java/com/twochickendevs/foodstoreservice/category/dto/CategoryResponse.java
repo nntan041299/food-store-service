@@ -1,3 +1,11 @@
 package com.twochickendevs.foodstoreservice.category.dto;
 
-public record CategoryResponse(Long id, String name) {}
+import java.time.LocalDateTime;
+
+public record CategoryResponse(
+        Long id,
+        Long shopId,
+        String name,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
+) {}

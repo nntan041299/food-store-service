@@ -8,5 +8,7 @@ import java.util.Set;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
+    boolean existsByShopIdAndName(Long shopId, String name);
+
     List<Category> findAllByShopIdAndIdIn(Long shopId, Set<Long> ids);
 }
