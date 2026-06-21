@@ -1,5 +1,6 @@
 package com.twochickendevs.foodstoreservice.inventoryitem.dto;
 
+import com.twochickendevs.foodstoreservice.inventoryitem.entity.InventoryUnit;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -30,8 +31,8 @@ public class CreateInventoryItemRequest {
     @DecimalMin(value = "0.0", message = "Price must not be negative")
     private BigDecimal price;
 
-    @Size(max = 20, message = "Unit must not exceed 20 characters")
-    private String unit;
+    @NotNull(message = "Unit is required")
+    private InventoryUnit unit;
 
     @NotNull(message = "Quantity is required")
     @Min(value = 0, message = "Quantity must not be negative")

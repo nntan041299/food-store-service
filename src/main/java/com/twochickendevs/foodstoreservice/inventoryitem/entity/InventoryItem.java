@@ -45,8 +45,9 @@ public class InventoryItem extends BaseEntity {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String unit;
+    private InventoryUnit unit;
 
     @Column(nullable = false)
     private Integer quantity;

@@ -17,8 +17,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,8 +24,6 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class InventoryItemService {
-
-    private static final String DEFAULT_UNIT = "pcs";
 
     private final InventoryItemRepository inventoryItemRepository;
     private final ShopRepository shopRepository;
@@ -56,7 +52,7 @@ public class InventoryItemService {
                 .description(request.getDescription())
                 .categories(categories)
                 .price(request.getPrice())
-                .unit(StringUtils.hasText(request.getUnit()) ? request.getUnit() : DEFAULT_UNIT)
+                .unit(request.getUnit())
                 .quantity(request.getQuantity())
                 .lowStockThreshold(request.getLowStockThreshold())
                 .imageUrl(request.getImageUrl())
